@@ -43,9 +43,28 @@ fn main() -> Result<()> {
             );
 
             if !halfkay::detect()? {
-                eprintln!("Teensy bootloader not detected.");
-                eprintln!("Press the reset button on the Teensy and try again.");
-                std::process::exit(1);
+                // Try to reboot running keyboard into bootloader
+                if halfkay::reboot_to_bootloader()? {
+                    println!("Rebooting keyboard into bootloader...");
+                    // Wait for bootloader to appear
+                    let mut found = false;
+                    for _ in 0..50 {
+                        std::thread::sleep(std::time::Duration::from_millis(100));
+                        if halfkay::detect()? {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if !found {
+                        eprintln!("Teensy bootloader not detected after reboot.");
+                        eprintln!("Press the reset button on the Teensy and try again.");
+                        std::process::exit(1);
+                    }
+                } else {
+                    eprintln!("Teensy bootloader not detected and keyboard not found.");
+                    eprintln!("Press the reset button on the Teensy and try again.");
+                    std::process::exit(1);
+                }
             }
 
             halfkay::flash(base_address, &data)?;

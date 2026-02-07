@@ -7,6 +7,10 @@ use std::time::Duration;
 const HALFKAY_VID: u16 = 0x16C0;
 const HALFKAY_PID: u16 = 0x0478;
 
+/// Running keyboard USB identifiers (must match firmware device descriptor).
+const KEYBOARD_VID: u16 = 0x16C0;
+const KEYBOARD_PID: u16 = 0x047E;
+
 /// ATmega32U4 flash page size in bytes.
 const PAGE_SIZE: usize = 128;
 
@@ -130,4 +134,24 @@ fn reboot(handle: &DeviceHandle<GlobalContext>) -> Result<()> {
     // Ignore errors on reboot — the device disconnects immediately
     let _ = handle.write_control(0x21, 0x09, 0x0200, 0, &buf, USB_TIMEOUT);
     Ok(())
+}
+
+/// Try to find the running keyboard and send a vendor request to jump to bootloader.
+/// Returns true if the keyboard was found and rebooted.
+pub fn reboot_to_bootloader() -> Result<bool> {
+    let devices = rusb::devices().context("failed to enumerate USB devices")?;
+    for device in devices.iter() {
+        let desc = device
+            .device_descriptor()
+            .context("failed to read device descriptor")?;
+        if desc.vendor_id() == KEYBOARD_VID && desc.product_id() == KEYBOARD_PID {
+            let handle = device
+                .open()
+                .context("failed to open keyboard device")?;
+            // Vendor request: bmRequestType=0x40, bRequest=0xFF
+            let _ = handle.write_control(0x40, 0xFF, 0, 0, &[], USB_TIMEOUT);
+            return Ok(true);
+        }
+    }
+    Ok(false)
 }

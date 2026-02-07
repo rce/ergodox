@@ -1,13 +1,12 @@
 //! Key matrix scanning for the ErgoDox keyboard.
 //!
 //! The ErgoDox has a 6×14 matrix split across two halves:
-//! - Right half: directly wired to Teensy GPIO pins
-//! - Left half: connected via MCP23018 I2C I/O expander
+//! - Right half: directly wired to Teensy 2.0 GPIO pins
+//! - Left half: connected via MCP23018 I2C I/O expander (see i2c.rs)
 //!
-//! On the ErgoDox PCB, the 6 drive pins (PB0-PB3, PD2, PD3) connect to
-//! physical columns, and the 7 read pins (PF0-PB6) connect to physical
-//! rows. We transpose when storing into the state matrix to get the
-//! correct [row][col] layout.
+//! Scanning drives one column LOW at a time and reads which rows are
+//! pulled LOW through the key switch + diode. The result is stored as
+//! `state[row][col]` with active-low convention (true = not pressed).
 
 use avr_device::atmega32u4::Peripherals;
 
@@ -22,6 +21,30 @@ pub const COLS: usize = COLS_PER_HALF * 2;
 
 /// Complete matrix state.
 pub type MatrixState = [[bool; COLS]; ROWS];
+
+// ── Right half pin mapping (Teensy 2.0 / ATmega32U4) ────────────────
+//
+// Column drive pins — directly wired to matrix columns (active-low outputs):
+//   Drive 0 → PB0  (col 7)       PORTB mask: 0x0F = PB0..PB3
+//   Drive 1 → PB1  (col 8)       PORTD mask: 0x0C = PD2..PD3
+//   Drive 2 → PB2  (col 9)
+//   Drive 3 → PB3  (col 10)
+//   Drive 4 → PD2  (col 11)
+//   Drive 5 → PD3  (col 12)
+//
+// Row read pins — directly wired to matrix rows (inputs with pull-ups):
+//   Read 0 → PF0  (row 0)        PORTF mask: 0xF3 = PF0,PF1,PF4..PF7
+//   Read 1 → PF1  (row 1)        PORTB mask: 0x40 = PB6
+//   Read 2 → PF4  (row 2)
+//   Read 3 → PF5  (row 3)
+//   Read 4 → PF6  (row 4)
+//   Read 5 → PF7  (row 5)
+//   Read 6 → PB6  (unused, no physical row 6)
+//
+// Other pins:
+//   PD0 = I2C SCL (to left half via TRRS)
+//   PD1 = I2C SDA (to left half via TRRS)
+//   PD6 = onboard LED
 
 /// Initialize the Teensy GPIO pins for matrix scanning (right half).
 ///
@@ -107,43 +130,42 @@ fn read_pins(dp: &Peripherals) -> u8 {
 
 /// Scan the entire matrix (right half via GPIO, left half via MCP23018).
 ///
-/// The ErgoDox PCB wires drive pins to physical columns and read pins to
-/// physical rows, so we transpose: state[read][drive + half_offset].
-pub fn scan(dp: &Peripherals, mcp: &Mcp23018) -> MatrixState {
+/// Right half: 6 drive pins → 6 columns, 7 read pins → 6 rows (7th unused).
+/// Left half: GPIOA drives 7 columns, GPIOB reads 6 rows.
+/// Both stored as state[row][col] with active-low convention.
+pub fn scan(dp: &Peripherals, mcp: &mut Mcp23018) -> MatrixState {
     let twi = &dp.TWI;
     let mut state = [[true; COLS]; ROWS]; // true = not pressed
 
-    for drive in 0..ROWS {
-        // Scan right half (Teensy GPIO)
-        drive_pin(dp, drive);
+    // Right half (Teensy GPIO): 6 columns via drive pins
+    for col in 0..ROWS {
+        drive_pin(dp, col);
         tiny_delay();
         let reads = read_pins(dp);
 
-        for read in 0..COLS_PER_HALF {
-            if read < ROWS {
-                // Transposed: read pin = physical row, drive pin = physical column
-                // GPIO is the right half → offset by COLS_PER_HALF
-                state[read][COLS_PER_HALF + drive] = (reads >> read) & 1 != 0;
-            }
-        }
-
-        // Scan left half (MCP23018)
-        let mcp_reads = mcp.read_row(twi, drive as u8);
-
-        for read in 0..COLS_PER_HALF {
-            if read < ROWS {
-                // Transposed: read = physical row, drive = physical column
-                // MCP is the left half → no offset
-                state[read][drive] = (mcp_reads >> read) & 1 != 0;
-            }
+        for row in 0..ROWS {
+            // Drive pin = column, read pin = row
+            // Right half columns offset by COLS_PER_HALF
+            state[row][COLS_PER_HALF + col] = (reads >> row) & 1 != 0;
         }
     }
 
-    // Deactivate all drive pins
+    // Deactivate right half drive pins
     let portb = &dp.PORTB;
     let portd = &dp.PORTD;
     portb.portb.modify(|r, w| unsafe { w.bits(r.bits() | 0x0F) });
     portd.portd.modify(|r, w| unsafe { w.bits(r.bits() | 0x0C) });
+
+    // Left half (MCP23018): 7 columns via GPIOA
+    for col in 0..COLS_PER_HALF {
+        let reads = mcp.scan_column(twi, col as u8);
+
+        for row in 0..ROWS {
+            // GPIOB bit = row, GPIOA pin = column
+            state[row][col] = (reads >> row) & 1 != 0;
+        }
+    }
+    mcp.deactivate(twi);
 
     state
 }

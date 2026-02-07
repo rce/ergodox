@@ -193,6 +193,10 @@ impl UsbKeyboard {
         }
     }
 
+    pub fn is_configured(&self) -> bool {
+        self.configured
+    }
+
     /// Initialize the ATmega32U4 USB controller.
     pub fn init(&mut self, dp: &Peripherals) {
         let usb = &dp.USB_DEVICE;
@@ -389,6 +393,12 @@ impl UsbKeyboard {
                 usb.ueintx.modify(|_, w| w.txini().clear_bit());
             }
 
+            // Vendor request: jump to bootloader
+            (0x40, 0xFF) => {
+                usb.ueintx.modify(|_, w| w.txini().clear_bit());
+                jump_to_bootloader(dp);
+            }
+
             _ => {
                 self.stall(dp);
             }
@@ -422,4 +432,47 @@ impl UsbKeyboard {
             .ueconx
             .modify(|_, w| w.stallrq().set_bit());
     }
+}
+
+/// Disable all peripherals and jump to the HalfKay bootloader at 0x7E00.
+fn jump_to_bootloader(dp: &Peripherals) -> ! {
+    // Disable interrupts
+    avr_device::interrupt::disable();
+
+    // Disconnect USB
+    dp.USB_DEVICE.udcon.write(|w| w.detach().set_bit());
+    dp.USB_DEVICE.usbcon.write(|w| w.frzclk().set_bit());
+
+    // Short delay for host to notice disconnect
+    for _ in 0..20000u16 {
+        unsafe { core::arch::asm!("nop") };
+    }
+
+    // Disable peripherals
+    dp.EXINT.eimsk.write(|w| w.bits(0));
+    dp.SPI.spcr.write(|w| unsafe { w.bits(0) });
+    dp.AC.acsr.write(|w| unsafe { w.bits(0) });
+    dp.EEPROM.eecr.write(|w| unsafe { w.bits(0) });
+    dp.ADC.adcsra.write(|w| unsafe { w.bits(0) });
+    dp.TC0.timsk0.write(|w| unsafe { w.bits(0) });
+    dp.TC1.timsk1.write(|w| unsafe { w.bits(0) });
+    dp.TC3.timsk3.write(|w| unsafe { w.bits(0) });
+    dp.TC4.timsk4.write(|w| unsafe { w.bits(0) });
+    dp.USART1.ucsr1b.write(|w| unsafe { w.bits(0) });
+    dp.TWI.twcr.write(|w| unsafe { w.bits(0) });
+
+    // Reset all port directions and values
+    dp.PORTB.ddrb.write(|w| unsafe { w.bits(0) });
+    dp.PORTB.portb.write(|w| unsafe { w.bits(0) });
+    dp.PORTC.ddrc.write(|w| unsafe { w.bits(0) });
+    dp.PORTC.portc.write(|w| unsafe { w.bits(0) });
+    dp.PORTD.ddrd.write(|w| unsafe { w.bits(0) });
+    dp.PORTD.portd.write(|w| unsafe { w.bits(0) });
+    dp.PORTE.ddre.write(|w| unsafe { w.bits(0) });
+    dp.PORTE.porte.write(|w| unsafe { w.bits(0) });
+    dp.PORTF.ddrf.write(|w| unsafe { w.bits(0) });
+    dp.PORTF.portf.write(|w| unsafe { w.bits(0) });
+
+    // Jump to bootloader
+    unsafe { core::arch::asm!("jmp 0x7E00", options(noreturn)) }
 }
