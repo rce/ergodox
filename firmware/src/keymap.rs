@@ -74,6 +74,8 @@ pub enum Keycode {
     Dot = 0x37,
     Slash = 0x38,
     CapsLock = 0x39,
+    /// Non-US \ and | (ISO key left of Z — produces < > on Nordic layouts)
+    NonUsBackslash = 0x64,
 
     // Function keys
     F1 = 0x3A,
@@ -171,6 +173,7 @@ const LALT: Keycode = Keycode::LAlt;
 const LGUI: Keycode = Keycode::LGui;
 const RSFT: Keycode = Keycode::RShift;
 const RALT: Keycode = Keycode::RAlt;
+const NUBS: Keycode = Keycode::NonUsBackslash;
 const LY1: Keycode = Keycode::Layer1;
 
 /// Keymap layers.
@@ -198,8 +201,8 @@ pub static LAYERS: [[[Keycode; COLS]; ROWS]; NUM_LAYERS] = [
          ___, Keycode::H, Keycode::J, Keycode::K, Keycode::L, Keycode::Semicolon, Keycode::Quote],
 
         // Row 3: bottom row
-        //  Left: LShift, Z, X, C, V, B, LY1    Right: LY1, N, M, ,, ., /, RShift
-        [LSFT, Keycode::Z, Keycode::X, Keycode::C, Keycode::V, Keycode::B, LY1,
+        //  Left: <>, Z, X, C, V, B, LY1    Right: LY1, N, M, ,, ., /, RShift
+        [NUBS, Keycode::Z, Keycode::X, Keycode::C, Keycode::V, Keycode::B, LY1,
          LY1, Keycode::N, Keycode::M, Keycode::Comma, Keycode::Dot, Keycode::Slash, RSFT],
 
         // Row 4: thumb cluster top
@@ -209,10 +212,10 @@ pub static LAYERS: [[[Keycode; COLS]; ROWS]; NUM_LAYERS] = [
          ___, ___, ___, ___, RALT, ___, ___],
 
         // Row 5: thumb cluster bottom
-        //  Left: _unused, _unused, Bksp, Del, _unused, _unused, _unused
-        //  Right: _unused, _unused, _unused, Enter, Space, _unused, _unused
-        [___, ___, BSP, DEL, ___, ___, ___,
-         ___, ___, ___, ENT, SPC, ___, ___],
+        //  Left: _unused, _unused, Space, Enter, _unused, _unused, _unused
+        //  Right: _unused, _unused, _unused, RShift, Bksp, _unused, _unused
+        [___, ___, ENT, SPC, ___, ___, ___,
+         ___, ___, ___, RSFT, BSP, ___, ___],
     ],
 
     // Layer 1: Function/Symbol
