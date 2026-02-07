@@ -69,7 +69,7 @@ const EP0_SIZE: u8 = 64; // Control endpoint size
 const EP1_SIZE: u8 = 8; // Interrupt IN endpoint size (keyboard reports)
 
 /// HID report descriptor for a standard keyboard.
-static HID_REPORT_DESCRIPTOR: [u8; 63] = [
+static HID_REPORT_DESCRIPTOR: [u8; 64] = [
     0x05, 0x01, // Usage Page (Generic Desktop)
     0x09, 0x06, // Usage (Keyboard)
     0xA1, 0x01, // Collection (Application)
@@ -155,6 +155,13 @@ static CONFIG_DESCRIPTOR: [u8; 34] = [
     1,    // bNumDescriptors
     0x22, // bDescriptorType (Report)
     HID_REPORT_DESCRIPTOR.len() as u8, 0, // wDescriptorLength
+    // Endpoint descriptor (EP1 IN — interrupt)
+    7,    // bLength
+    5,    // bDescriptorType (Endpoint)
+    0x81, // bEndpointAddress (EP1 IN)
+    0x03, // bmAttributes (Interrupt)
+    EP1_SIZE, 0, // wMaxPacketSize
+    10,   // bInterval (10ms polling)
 ];
 
 /// String descriptor 0 (language ID)
@@ -256,10 +263,10 @@ impl UsbKeyboard {
         }
 
         // Write 8-byte report
-        usb.uedatx.write(|w| unsafe { w.bits(report.modifiers) });
-        usb.uedatx.write(|w| unsafe { w.bits(report.reserved) });
+        usb.uedatx.write(|w| w.bits(report.modifiers));
+        usb.uedatx.write(|w| w.bits(report.reserved));
         for &key in &report.keys {
-            usb.uedatx.write(|w| unsafe { w.bits(key) });
+            usb.uedatx.write(|w| w.bits(key));
         }
 
         // Clear FIFOCON and TXINI to send
@@ -275,8 +282,8 @@ impl UsbKeyboard {
         self.select_endpoint(dp, 0);
         // Enable EP0 as control endpoint, 64 bytes
         usb.ueconx.write(|w| w.epen().set_bit());
-        usb.uecfg0x.write(|w| w.eptype().control());
-        usb.uecfg1x.write(|w| w.epsize().bits_64().alloc().set_bit());
+        usb.uecfg0x.write(|w| w.eptype().bits(0b00));
+        usb.uecfg1x.write(|w| w.epsize().bits(0b011).alloc().set_bit());
     }
 
     fn configure_ep1(&self, dp: &Peripherals) {
@@ -286,14 +293,14 @@ impl UsbKeyboard {
         usb.ueconx.write(|w| w.epen().set_bit());
         // Interrupt IN endpoint
         usb.uecfg0x
-            .write(|w| w.eptype().interrupt().epdir().set_bit());
-        usb.uecfg1x.write(|w| w.epsize().bits_8().alloc().set_bit());
+            .write(|w| w.eptype().bits(0b11).epdir().set_bit());
+        usb.uecfg1x.write(|w| w.epsize().bits(0b000).alloc().set_bit());
     }
 
     fn select_endpoint(&self, dp: &Peripherals, ep: u8) {
         dp.USB_DEVICE
             .uenum
-            .write(|w| unsafe { w.bits(ep & 0x07) });
+            .write(|w| w.bits(ep & 0x07));
     }
 
     fn handle_setup(&mut self, dp: &Peripherals) {
@@ -342,7 +349,7 @@ impl UsbKeyboard {
                 usb.ueintx.modify(|_, w| w.txini().clear_bit());
                 while usb.ueintx.read().txini().bit_is_clear() {}
                 usb.udaddr
-                    .write(|w| unsafe { w.uadd().bits(w_value_l & 0x7F) }.adden().set_bit());
+                    .write(|w| w.uadd().bits(w_value_l & 0x7F).adden().set_bit());
             }
 
             // SET_CONFIGURATION
@@ -357,7 +364,7 @@ impl UsbKeyboard {
             (0x80, 0x08) => {
                 while usb.ueintx.read().txini().bit_is_clear() {}
                 usb.uedatx
-                    .write(|w| unsafe { w.bits(if self.configured { 1 } else { 0 }) });
+                    .write(|w| w.bits(if self.configured { 1 } else { 0 }));
                 usb.ueintx.modify(|_, w| w.txini().clear_bit());
             }
 
@@ -398,7 +405,7 @@ impl UsbKeyboard {
 
             let chunk_end = core::cmp::min(sent + EP0_SIZE as usize, len);
             for &byte in &desc[sent..chunk_end] {
-                usb.uedatx.write(|w| unsafe { w.bits(byte) });
+                usb.uedatx.write(|w| w.bits(byte));
             }
 
             usb.ueintx.modify(|_, w| w.txini().clear_bit());

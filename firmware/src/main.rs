@@ -9,6 +9,7 @@
 #![no_std]
 #![no_main]
 #![feature(abi_avr_interrupt)]
+#![feature(asm_experimental_arch)]
 
 mod debounce;
 mod hid;
@@ -41,8 +42,8 @@ pub extern "C" fn main() -> ! {
     // Initialize LED on PD6 (Teensy on-board LED) for diagnostics
     dp.PORTD.ddrd.modify(|r, w| unsafe { w.bits(r.bits() | 0x40) }); // PD6 output
 
-    // Initialize left-half matrix GPIO
-    matrix::init_left(&dp);
+    // Initialize right-half matrix GPIO (Teensy side)
+    matrix::init_gpio(&dp);
 
     // Initialize I2C and MCP23018 for right half
     let mut mcp = Mcp23018::new();

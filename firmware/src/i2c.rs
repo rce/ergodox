@@ -1,8 +1,8 @@
-//! MCP23018 I2C driver for the ErgoDox right half.
+//! MCP23018 I2C driver for the ErgoDox left half.
 //!
-//! The right half of the ErgoDox uses an MCP23018 I/O expander connected via I2C.
-//! GPIOA pins are used as row outputs (directly driving rows low) and
-//! GPIOB pins are used as column inputs with internal pull-ups.
+//! The left half of the ErgoDox uses an MCP23018 I/O expander connected via I2C.
+//! GPIOA pins drive one at a time (active low) and GPIOB pins read with pull-ups.
+//! The matrix.rs scan function handles the row/column transposition.
 
 use avr_device::atmega32u4::TWI;
 
@@ -10,11 +10,11 @@ use avr_device::atmega32u4::TWI;
 const MCP23018_ADDR: u8 = 0x20;
 
 // MCP23018 register addresses (IOCON.BANK = 0, default)
-const IODIRA: u8 = 0x00; // I/O direction register A (rows)
-const IODIRB: u8 = 0x01; // I/O direction register B (columns)
+const IODIRA: u8 = 0x00; // I/O direction register A (drive outputs)
+const IODIRB: u8 = 0x01; // I/O direction register B (read inputs)
 const GPPUB: u8 = 0x0D; // Pull-up resistor register B
-const GPIOA: u8 = 0x12; // Port A register
-const GPIOB: u8 = 0x13; // Port B register
+const GPIOA: u8 = 0x12; // Port A register (drive)
+const GPIOB: u8 = 0x13; // Port B register (read)
 
 /// TWI (I2C) clock prescaler and bit rate for ~100kHz at 16MHz CPU.
 /// SCL freq = CPU_FREQ / (16 + 2 * TWBR * prescaler)
@@ -41,7 +41,7 @@ impl Mcp23018 {
     /// Initialize the TWI hardware and configure the MCP23018.
     pub fn init(&mut self, twi: &TWI) {
         // Set TWI bit rate
-        twi.twbr.write(|w| unsafe { w.bits(TWBR_VALUE) });
+        twi.twbr.write(|w| w.bits(TWBR_VALUE));
         // Prescaler = 1 (TWPS = 0)
         twi.twsr.write(|w| w.twps().prescaler_1());
         // Enable TWI
@@ -55,13 +55,13 @@ impl Mcp23018 {
 
     /// Configure MCP23018 I/O direction and pull-ups.
     fn configure(&self, twi: &TWI) -> Result<(), ()> {
-        // IODIRA = 0x00: all pins output (rows)
+        // IODIRA = 0x00: all pins output (drive)
         self.write_register(twi, IODIRA, 0x00)?;
-        // IODIRB = 0x7F: pins 0-6 input (columns), pin 7 unused
+        // IODIRB = 0x7F: pins 0-6 input (read), pin 7 unused
         self.write_register(twi, IODIRB, 0x7F)?;
-        // GPPUB = 0x7F: enable pull-ups on column inputs
+        // GPPUB = 0x7F: enable pull-ups on read inputs
         self.write_register(twi, GPPUB, 0x7F)?;
-        // Drive all rows high initially (inactive)
+        // Drive all outputs high initially (inactive)
         self.write_register(twi, GPIOA, 0xFF)?;
         Ok(())
     }
@@ -75,15 +75,15 @@ impl Mcp23018 {
         }
     }
 
-    /// Read the column states for a given row on the right half.
-    /// Returns 7 bits of column data (active low), or 0x7F if not initialized.
+    /// Drive one pin low on GPIOA and read GPIOB.
+    /// Returns 7 bits of read data (active low), or 0x7F if not initialized.
     pub fn read_row(&self, twi: &TWI, row: u8) -> u8 {
         if !self.initialized {
             return 0x7F; // All keys up
         }
 
-        // Drive the target row low, all others high
-        let row_bits = !(1u8 << row) & 0x3F; // Only 6 rows
+        // Drive the target pin low, all others high
+        let row_bits = !(1u8 << row) & 0x3F; // Only 6 drive pins
         if self.write_register(twi, GPIOA, row_bits).is_err() {
             return 0x7F;
         }
@@ -91,7 +91,7 @@ impl Mcp23018 {
         // Small delay for signal settling
         tiny_delay();
 
-        // Read column inputs
+        // Read inputs
         match self.read_register(twi, GPIOB) {
             Ok(val) => val & 0x7F,
             Err(()) => 0x7F,
@@ -133,7 +133,7 @@ impl Mcp23018 {
     }
 
     fn i2c_write(&self, twi: &TWI, data: u8) -> Result<(), ()> {
-        twi.twdr.write(|w| unsafe { w.bits(data) });
+        twi.twdr.write(|w| w.bits(data));
         twi.twcr.write(|w| w.twint().set_bit().twen().set_bit());
         self.wait_twint(twi);
         let status = twi.twsr.read().tws().bits();
