@@ -1,0 +1,8 @@
+[build]
+target = "avr-unknown-gnu-atmega32u4"
+
+[target.'cfg(target_arch = "avr")']
+runner = "echo 'Flash with: ergodox-cli flash'"
+
+[unstable]
+build-std = ["core"]

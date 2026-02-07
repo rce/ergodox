@@ -1,0 +1,8 @@
+[package]
+name = "firmware"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+avr-device = { version = "0.6", features = ["atmega32u4"] }
+
