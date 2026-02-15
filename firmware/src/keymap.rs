@@ -253,9 +253,9 @@ pub static LAYERS: [[[Keycode; COLS]; ROWS]; NUM_LAYERS] = [
 
         // Row 4: thumb cluster top
         //  Left: LY1, LAlt, LGui, ´`, LGui, _unused, _unused
-        //  Right: _unused, _unused, _unused, _, RAlt, _, _unused
+        //  Right: _unused, _unused, Left, Down, Up, Right, _unused
         [LY1, LALT, LGUI, ACGR, LGUI, ___, ___,
-         ___, ___, ___, ___, RALT, ___, ___],
+         ___, ___, Keycode::Left, Keycode::Down, Keycode::Up, Keycode::Right, ___],
 
         // Row 5: thumb cluster bottom
         //  Left: _unused, _unused, Space, Enter, _unused, _unused, _unused
