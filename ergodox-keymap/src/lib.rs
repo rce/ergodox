@@ -47,7 +47,7 @@ pub mod layout {
 
 /// USB HID keycodes.
 /// See USB HID Usage Tables, Section 10 (Keyboard/Keypad Page 0x07).
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Keycode {
     /// No key / transparent (fall through to lower layer)
@@ -336,62 +336,180 @@ pub static LAYERS: [[[Keycode; COLS]; ROWS]; NUM_LAYERS] = [
     [
         // Row 0: number row
         //  Left: §½, 1, 2, 3, 4, 5, ___       Right: +?, 6, 7, 8, 9, 0, +?
-        [SECT, Keycode::N1, Keycode::N2, Keycode::N3, Keycode::N4, Keycode::N5, ___,
-         PLSQ, Keycode::N6, Keycode::N7, Keycode::N8, Keycode::N9, Keycode::N0, PLSQ],
-
+        [
+            SECT,
+            Keycode::N1,
+            Keycode::N2,
+            Keycode::N3,
+            Keycode::N4,
+            Keycode::N5,
+            ___,
+            PLSQ,
+            Keycode::N6,
+            Keycode::N7,
+            Keycode::N8,
+            Keycode::N9,
+            Keycode::N0,
+            PLSQ,
+        ],
         // Row 1: top letter row
         //  Left: Tab, Q, W, E, R, T, PgUp      Right: ¨^, Y, U, I, O, P, '*
-        [TAB, Keycode::Q, Keycode::W, Keycode::E, Keycode::R, Keycode::T, PGUP,
-         DIAC, Keycode::Y, Keycode::U, Keycode::I, Keycode::O, Keycode::P, APST],
-
+        [
+            TAB,
+            Keycode::Q,
+            Keycode::W,
+            Keycode::E,
+            Keycode::R,
+            Keycode::T,
+            PGUP,
+            DIAC,
+            Keycode::Y,
+            Keycode::U,
+            Keycode::I,
+            Keycode::O,
+            Keycode::P,
+            APST,
+        ],
         // Row 2: home row
         //  Left: LCtrl, A, S, D, F, G, LY1     Right: _unused, H, J, K, L, ö, ä
-        [LCTL, Keycode::A, Keycode::S, Keycode::D, Keycode::F, Keycode::G, LY1,
-         ___, Keycode::H, Keycode::J, Keycode::K, Keycode::L, ODIA, ADIA],
-
+        [
+            LCTL,
+            Keycode::A,
+            Keycode::S,
+            Keycode::D,
+            Keycode::F,
+            Keycode::G,
+            LY1,
+            ___,
+            Keycode::H,
+            Keycode::J,
+            Keycode::K,
+            Keycode::L,
+            ODIA,
+            ADIA,
+        ],
         // Row 3: bottom row
         //  Left: <>, Z, X, C, V, B, PgDn   Right: ___, N, M, ,, ., -_, '*
-        [ANGB, Keycode::Z, Keycode::X, Keycode::C, Keycode::V, Keycode::B, PGDN,
-         ___, Keycode::N, Keycode::M, Keycode::Comma, Keycode::Dot, MINU, APST],
-
+        [
+            ANGB,
+            Keycode::Z,
+            Keycode::X,
+            Keycode::C,
+            Keycode::V,
+            Keycode::B,
+            PGDN,
+            ___,
+            Keycode::N,
+            Keycode::M,
+            Keycode::Comma,
+            Keycode::Dot,
+            MINU,
+            APST,
+        ],
         // Row 4: thumb cluster top
         //  Left: LY1, LAlt, LGui, ´`, LGui, _unused, _unused
         //  Right: _unused, _unused, Left, Down, Up, Right, LY1
-        [LY1, LALT, LGUI, ACGR, LGUI, ___, ___,
-         ___, ___, Keycode::Left, Keycode::Down, Keycode::Up, Keycode::Right, LY1],
-
+        [
+            LY1,
+            LALT,
+            LGUI,
+            ACGR,
+            LGUI,
+            ___,
+            ___,
+            ___,
+            ___,
+            Keycode::Left,
+            Keycode::Down,
+            Keycode::Up,
+            Keycode::Right,
+            LY1,
+        ],
         // Row 5: thumb cluster bottom
         //  Left: Esc, _unused, Space, Enter, Home, End, _unused
         //  Right: _unused, _unused, _unused, RShift, Bksp, _unused, _unused
-        [ESC, ___, ENT, SPC, Keycode::Home, Keycode::End, ___,
-         ___, DEL, ___, RSFT, BSP, ___, ___],
+        [
+            ESC,
+            ___,
+            ENT,
+            SPC,
+            Keycode::Home,
+            Keycode::End,
+            ___,
+            ___,
+            DEL,
+            ___,
+            RSFT,
+            BSP,
+            ___,
+            ___,
+        ],
     ],
-
     // Layer 1: Function/Symbol
     [
         // Row 0
-        [___, Keycode::F1, Keycode::F2, Keycode::F3, Keycode::F4, Keycode::F5, ___,
-         ___, Keycode::F6, Keycode::F7, Keycode::F8, Keycode::F9, Keycode::F10, ___],
-
+        [
+            ___,
+            Keycode::F1,
+            Keycode::F2,
+            Keycode::F3,
+            Keycode::F4,
+            Keycode::F5,
+            ___,
+            ___,
+            Keycode::F6,
+            Keycode::F7,
+            Keycode::F8,
+            Keycode::F9,
+            Keycode::F10,
+            ___,
+        ],
         // Row 1
-        [___, ___, ___, ___, ___, ___, Keycode::F11,
-         Keycode::F12, ___, ___, ___, ___, ___, ___],
-
+        [
+            ___,
+            ___,
+            ___,
+            ___,
+            ___,
+            ___,
+            Keycode::F11,
+            Keycode::F12,
+            ___,
+            ___,
+            ___,
+            ___,
+            ___,
+            ___,
+        ],
         // Row 2
-        [___, ___, ___, ___, ___, ___, ___,
-         ___, Keycode::Left, Keycode::Down, Keycode::Up, Keycode::Right, ___, ___],
-
+        [
+            ___,
+            ___,
+            ___,
+            ___,
+            ___,
+            ___,
+            ___,
+            ___,
+            Keycode::Left,
+            Keycode::Down,
+            Keycode::Up,
+            Keycode::Right,
+            ___,
+            ___,
+        ],
         // Row 3
-        [___, ___, ___, ___, ___, ___, ___,
-         ___, ___, ___, ___, ___, ___, ___],
-
+        [
+            ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___,
+        ],
         // Row 4
-        [___, ___, ___, ___, ___, ___, ___,
-         ___, ___, ___, ___, ___, ___, ___],
-
+        [
+            ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___,
+        ],
         // Row 5
-        [___, ___, ___, ___, ___, ___, ___,
-         ___, ___, ___, ___, ___, ___, ___],
+        [
+            ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___, ___,
+        ],
     ],
 ];
 
@@ -429,5 +547,260 @@ pub fn lookup(layer: usize, row: usize, col: usize) -> Keycode {
             return kc;
         }
         l -= 1;
+    }
+}
+
+// =============================================================================
+// Tests — literate contracts for the ErgoDox keymap
+// =============================================================================
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // =========================================================================
+    // Matrix dimensions
+    // =========================================================================
+    //
+    // The ErgoDox has a 6×14 key matrix split across two halves connected by
+    // a TRRS cable. Each half contributes 7 columns: left (cols 0–6) and
+    // right (cols 7–13). These constants must match the physical PCB wiring
+    // — if they drift, the firmware will scan the wrong pins.
+
+    #[test]
+    fn matrix_is_six_rows() {
+        // The PCB has 6 row traces (rows 0–5). Row 5 is the thumb cluster.
+        assert_eq!(ROWS, 6);
+    }
+
+    #[test]
+    fn matrix_is_fourteen_columns() {
+        // 7 columns per half × 2 halves = 14 total columns.
+        assert_eq!(COLS, 14);
+        assert_eq!(COLS_PER_HALF, 7);
+        assert_eq!(COLS, COLS_PER_HALF * 2);
+    }
+
+    #[test]
+    fn layer_table_matches_matrix_dimensions() {
+        // Every layer must be exactly ROWS × COLS. A mismatch would cause
+        // out-of-bounds access during matrix scanning.
+        assert_eq!(LAYERS.len(), NUM_LAYERS);
+        for (i, layer) in LAYERS.iter().enumerate() {
+            assert_eq!(layer.len(), ROWS, "layer {i} row count");
+            for (r, row) in layer.iter().enumerate() {
+                assert_eq!(row.len(), COLS, "layer {i} row {r} col count");
+            }
+        }
+    }
+
+    // =========================================================================
+    // Modifier encoding — USB HID modifier byte
+    // =========================================================================
+    //
+    // USB HID boot-protocol keyboards report modifiers in a single byte
+    // (byte 0 of the 8-byte report). Each modifier occupies one bit:
+    //
+    //   bit 0 = Left Ctrl   (0xE0)
+    //   bit 1 = Left Shift  (0xE1)
+    //   bit 2 = Left Alt    (0xE2)
+    //   bit 3 = Left GUI    (0xE3)
+    //   bit 4 = Right Ctrl  (0xE4)
+    //   bit 5 = Right Shift (0xE5)
+    //   bit 6 = Right Alt   (0xE6)
+    //   bit 7 = Right GUI   (0xE7)
+    //
+    // The modifier_bit() method converts a keycode in 0xE0–0xE7 to the
+    // corresponding bitmask by computing 1 << (keycode - 0xE0).
+
+    #[test]
+    fn modifiers_span_0xe0_through_0xe7() {
+        // The USB HID spec (Usage Tables §10) assigns keycodes 0xE0–0xE7
+        // to the eight modifier keys. All eight must be recognized.
+        let mods = [
+            Keycode::LCtrl,
+            Keycode::LShift,
+            Keycode::LAlt,
+            Keycode::LGui,
+            Keycode::RCtrl,
+            Keycode::RShift,
+            Keycode::RAlt,
+            Keycode::RGui,
+        ];
+        for (i, &kc) in mods.iter().enumerate() {
+            assert!(kc.is_modifier(), "0x{:02X} should be a modifier", kc as u8);
+            assert_eq!(kc as u8, 0xE0 + i as u8);
+        }
+    }
+
+    #[test]
+    fn modifier_bit_maps_to_correct_position() {
+        // Each modifier must map to exactly one bit. LCtrl = bit 0 (0x01),
+        // RGui = bit 7 (0x80). The firmware ORs these together to build
+        // the modifier byte in the HID report.
+        assert_eq!(Keycode::LCtrl.modifier_bit(), 0x01); // bit 0
+        assert_eq!(Keycode::LShift.modifier_bit(), 0x02); // bit 1
+        assert_eq!(Keycode::LAlt.modifier_bit(), 0x04); // bit 2
+        assert_eq!(Keycode::LGui.modifier_bit(), 0x08); // bit 3
+        assert_eq!(Keycode::RCtrl.modifier_bit(), 0x10); // bit 4
+        assert_eq!(Keycode::RShift.modifier_bit(), 0x20); // bit 5
+        assert_eq!(Keycode::RAlt.modifier_bit(), 0x40); // bit 6
+        assert_eq!(Keycode::RGui.modifier_bit(), 0x80); // bit 7
+    }
+
+    #[test]
+    fn non_modifier_has_zero_bit() {
+        // Regular keys must return 0 — they go in the keycode array, not
+        // the modifier byte. A nonzero result here would cause phantom
+        // modifier presses.
+        assert_eq!(Keycode::A.modifier_bit(), 0);
+        assert_eq!(Keycode::Space.modifier_bit(), 0);
+        assert_eq!(Keycode::Layer1.modifier_bit(), 0);
+    }
+
+    // =========================================================================
+    // Layer key encoding
+    // =========================================================================
+    //
+    // Layer keys use keycodes 0xF0+N (a range well above real HID keycodes).
+    // The firmware interprets these during matrix scanning: when a layer key
+    // is held, it activates layer N. These are momentary — releasing the key
+    // drops back to layer 0.
+    //
+    // Trans (0x00) is the "transparent" sentinel. In HID, 0x00 means
+    // "no event" — the host ignores it. We reuse it to mean "look at the
+    // layer below" during keycode resolution.
+
+    #[test]
+    fn layer1_encodes_as_0xf1() {
+        // Layer keys are 0xF0 + layer number. Layer1 = 0xF1.
+        assert_eq!(Keycode::Layer1 as u8, 0xF1);
+        assert!(Keycode::Layer1.is_layer());
+        assert_eq!(Keycode::Layer1.layer_number(), 1);
+    }
+
+    #[test]
+    fn trans_is_zero_and_transparent() {
+        // 0x00 = "no event" in HID. We use it as "fall through to lower layer."
+        // This works because the host already ignores 0x00 in key reports,
+        // so if it somehow leaks through, no spurious keypress occurs.
+        assert_eq!(Keycode::Trans as u8, 0x00);
+        assert!(Keycode::Trans.is_transparent());
+    }
+
+    #[test]
+    fn trans_is_not_a_modifier_or_layer() {
+        // Trans must not be mistaken for a modifier or layer key — it's
+        // the absence of a binding, not an action.
+        assert!(!Keycode::Trans.is_modifier());
+        assert!(!Keycode::Trans.is_layer());
+    }
+
+    // =========================================================================
+    // Layer resolution
+    // =========================================================================
+    //
+    // resolve_layer() scans the pressed-key matrix and returns the highest
+    // active layer. Layer keys are always read from layer 0 (so you can't
+    // accidentally remap your layer keys on a higher layer).
+    //
+    // lookup() resolves a keycode at a position: if the active layer has
+    // Trans, it falls through to layer 0. This is the "transparent" concept
+    // — higher layers only override keys they explicitly define.
+
+    #[test]
+    fn no_layer_keys_pressed_gives_layer_zero() {
+        // With nothing pressed, the active layer is 0.
+        let keys = [[false; COLS]; ROWS];
+        assert_eq!(resolve_layer(&keys), 0);
+    }
+
+    #[test]
+    fn pressing_layer1_key_activates_layer_one() {
+        // Layer1 keys exist at several positions on layer 0 (e.g., row 2 col 6).
+        // Holding any of them should activate layer 1.
+        let mut keys = [[false; COLS]; ROWS];
+
+        // Find a Layer1 key position on layer 0
+        let (ly_row, ly_col) = find_layer_key_position();
+        keys[ly_row][ly_col] = true;
+
+        assert_eq!(resolve_layer(&keys), 1);
+    }
+
+    #[test]
+    fn lookup_returns_layer0_key_on_base_layer() {
+        // On layer 0, lookup returns exactly what's in the LAYERS table.
+        // Row 1, col 1 = Q on the default QWERTY layout.
+        assert_eq!(lookup(0, 1, 1), Keycode::Q);
+    }
+
+    #[test]
+    fn lookup_falls_through_transparent_keys() {
+        // On layer 1, most keys are Trans (0x00). lookup() should fall
+        // through to layer 0 and return the base-layer binding.
+        //
+        // Row 1, col 1 = Trans on layer 1, Q on layer 0 → returns Q.
+        assert_eq!(LAYERS[1][1][1], Keycode::Trans);
+        assert_eq!(lookup(1, 1, 1), Keycode::Q);
+    }
+
+    #[test]
+    fn lookup_returns_override_when_not_transparent() {
+        // Layer 1 overrides some keys — e.g., row 0 col 1 is F1.
+        // lookup() should return the override, not the base-layer key.
+        assert_eq!(LAYERS[1][0][1], Keycode::F1);
+        assert_eq!(lookup(1, 0, 1), Keycode::F1);
+    }
+
+    // =========================================================================
+    // Nordic aliases — layout-agnostic keycodes
+    // =========================================================================
+    //
+    // HID keycodes are layout-agnostic: they describe a physical key position,
+    // not the character it produces. The character depends on the OS keyboard
+    // layout. A Nordic keyboard has different legends than a US one, but the
+    // HID keycodes are the same physical keys.
+    //
+    // These aliases let us write the keymap using Nordic labels (å, ö, ä, etc.)
+    // while emitting the correct US-centric HID keycodes. The OS, set to a
+    // Nordic layout, translates them to the right characters.
+
+    #[test]
+    fn nordic_aliases_map_to_us_keycodes() {
+        use layout::nordic::*;
+
+        // Each Nordic key occupies the same physical position as a US key.
+        // The alias documents what the Nordic legend says; the value is the
+        // US keycode at that physical position.
+        assert_eq!(PLUS_QUESTION, Keycode::Minus, "+? is US Minus");
+        assert_eq!(ACUTE_GRAVE, Keycode::Equal, "´` is US Equal");
+        assert_eq!(A_RING, Keycode::LBracket, "å is US [");
+        assert_eq!(DIAERESIS_CARET, Keycode::RBracket, "¨^ is US ]");
+        assert_eq!(APOSTROPHE_STAR, Keycode::Backslash, "'* is US \\");
+        assert_eq!(O_DIAERESIS, Keycode::Semicolon, "ö is US ;");
+        assert_eq!(A_DIAERESIS, Keycode::Quote, "ä is US '");
+        assert_eq!(SECTION_HALF, Keycode::Grave, "§½ is US `");
+        assert_eq!(
+            ANGLE_BRACKETS,
+            Keycode::NonUsBackslash,
+            "<> is ISO extra key"
+        );
+        assert_eq!(MINUS_UNDERSCORE, Keycode::Slash, "-_ is US /");
+    }
+
+    // =========================================================================
+    // Helpers
+    // =========================================================================
+
+    /// Find any Layer1 key position on layer 0.
+    fn find_layer_key_position() -> (usize, usize) {
+        for row in 0..ROWS {
+            for col in 0..COLS {
+                if LAYERS[0][row][col] == Keycode::Layer1 {
+                    return (row, col);
+                }
+            }
+        }
+        panic!("no Layer1 key found on layer 0");
     }
 }

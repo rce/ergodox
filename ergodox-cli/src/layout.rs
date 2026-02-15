@@ -156,28 +156,35 @@ fn build_thumb(keys: &mut Vec<Key>, is_left: bool, bx: f64, by: f64) {
         // Left thumb cluster: tall keys on left, stacked smalls on right
         let tx = bx + 4.0 * S;
         [
-            (3, tx,           ty + S,       h2u), // col A: tall1 (2u)
-            (5, tx + S,       ty,           U),   // col B top: small above tall2
-            (2, tx + S,       ty + S,       h2u), // col B bot: tall2 (2u)
-            (4, tx + 2.0 * S, ty,           U),   // col C: small 1 (top)
-            (1, tx + 2.0 * S, ty + S,       U),   // col C: small 2 (mid)
-            (0, tx + 2.0 * S, ty + 2.0 * S, U),  // col C: small 3 (bot)
+            (3, tx, ty + S, h2u),               // col A: tall1 (2u)
+            (5, tx + S, ty, U),                 // col B top: small above tall2
+            (2, tx + S, ty + S, h2u),           // col B bot: tall2 (2u)
+            (4, tx + 2.0 * S, ty, U),           // col C: small 1 (top)
+            (1, tx + 2.0 * S, ty + S, U),       // col C: small 2 (mid)
+            (0, tx + 2.0 * S, ty + 2.0 * S, U), // col C: small 3 (bot)
         ]
     } else {
         // Right thumb cluster: mirrored — stacked smalls on left, tall keys on right
         let tx = bx + GAP;
         [
-            (9,  tx,           ty,           U),   // col C: small 1 (top)
-            (12, tx,           ty + S,       U),   // col C: small 2 (mid)
-            (13, tx,           ty + 2.0 * S, U),   // col C: small 3 (bot)
-            (8,  tx + S,       ty,           U),   // col B top: small above tall2
-            (11, tx + S,       ty + S,       h2u), // col B bot: tall2 (2u)
-            (10, tx + 2.0 * S, ty + S,       h2u), // col A: tall1 (2u)
+            (9, tx, ty, U),                  // col C: small 1 (top)
+            (12, tx, ty + S, U),             // col C: small 2 (mid)
+            (13, tx, ty + 2.0 * S, U),       // col C: small 3 (bot)
+            (8, tx + S, ty, U),              // col B top: small above tall2
+            (11, tx + S, ty + S, h2u),       // col B bot: tall2 (2u)
+            (10, tx + 2.0 * S, ty + S, h2u), // col A: tall1 (2u)
         ]
     };
 
     for (col, x, y, h) in positions {
-        keys.push(Key { x, y, w: U, h, row: 5, col });
+        keys.push(Key {
+            x,
+            y,
+            w: U,
+            h,
+            row: 5,
+            col,
+        });
     }
 }
 
@@ -348,4 +355,172 @@ pub fn generate_html() -> String {
 
     html.push_str("</svg>\n</body>\n</html>\n");
     html
+}
+
+// =============================================================================
+// Tests — literate contracts for the ErgoDox physical layout
+// =============================================================================
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashSet;
+
+    // =========================================================================
+    // Physical key count
+    // =========================================================================
+    //
+    // The ErgoDox PCB has exactly 76 mechanical switch positions. This is a
+    // fundamental property of the hardware — if build_keys() produces a
+    // different count, the SVG will be missing keys or showing phantoms.
+    //
+    // Each half has:
+    //   - 4 rows × 6 main columns = 24 keys (inner column has 3, not 4)
+    //   - Inner column: 3 keys (row 0, row 1 as 1.5u, row 3 as 1.5u)
+    //   - Bottom row (row 4): 5 keys
+    //   - Thumb cluster (row 5): 6 keys
+    //   Total per half: 24 + 3 + 5 + 6 = 38
+    //   Grand total: 38 × 2 = 76
+
+    #[test]
+    fn build_keys_produces_76_keys() {
+        // 76 switches = the physical ErgoDox switch count.
+        let keys = build_keys();
+        assert_eq!(keys.len(), 76, "ErgoDox has exactly 76 switches");
+    }
+
+    // =========================================================================
+    // Matrix coverage — no gaps, no overlaps
+    // =========================================================================
+    //
+    // Every physical key must map to a unique (row, col) position in the
+    // keymap matrix. Duplicates would mean two physical keys fight over one
+    // matrix slot (electrical short). Missing positions would mean a key
+    // exists on the PCB but can't be typed.
+
+    #[test]
+    fn no_duplicate_matrix_positions() {
+        let keys = build_keys();
+        let mut seen = HashSet::new();
+        for key in &keys {
+            let pos = (key.row, key.col);
+            assert!(
+                seen.insert(pos),
+                "duplicate matrix position: row {}, col {}",
+                key.row,
+                key.col,
+            );
+        }
+    }
+
+    #[test]
+    fn all_positions_within_matrix_bounds() {
+        // Every key's (row, col) must fit inside the ROWS × COLS keymap.
+        // Out-of-bounds would panic during layer lookup.
+        let keys = build_keys();
+        for key in &keys {
+            assert!(
+                key.row < ergodox_keymap::ROWS,
+                "row {} out of bounds (max {})",
+                key.row,
+                ergodox_keymap::ROWS - 1,
+            );
+            assert!(
+                key.col < ergodox_keymap::COLS,
+                "col {} out of bounds (max {})",
+                key.col,
+                ergodox_keymap::COLS - 1,
+            );
+        }
+    }
+
+    // =========================================================================
+    // Thumb cluster — row 5, 6 keys per half
+    // =========================================================================
+    //
+    // The thumb clusters are the distinctive feature of the ErgoDox. Each
+    // half has 6 thumb keys, all wired to row 5 of the matrix. The left
+    // cluster uses cols 0–5 and the right uses cols 8–13.
+
+    #[test]
+    fn twelve_thumb_keys_all_on_row_five() {
+        let keys = build_keys();
+        let thumb_keys: Vec<_> = keys.iter().filter(|k| k.row == 5).collect();
+        assert_eq!(thumb_keys.len(), 12, "6 thumb keys per half × 2 halves");
+    }
+
+    #[test]
+    fn left_thumb_uses_cols_0_through_5() {
+        // Left half thumb keys: row 5, cols 0–5 (within the left half range 0–6).
+        let keys = build_keys();
+        let left_thumb: HashSet<usize> = keys
+            .iter()
+            .filter(|k| k.row == 5 && k.col < 7)
+            .map(|k| k.col)
+            .collect();
+        let expected: HashSet<usize> = (0..=5).collect();
+        assert_eq!(left_thumb, expected, "left thumb should use cols 0–5");
+    }
+
+    #[test]
+    fn right_thumb_uses_cols_8_through_13() {
+        // Right half thumb keys: row 5, cols 8–13 (within the right half range 7–13).
+        let keys = build_keys();
+        let right_thumb: HashSet<usize> = keys
+            .iter()
+            .filter(|k| k.row == 5 && k.col >= 7)
+            .map(|k| k.col)
+            .collect();
+        let expected: HashSet<usize> = (8..=13).collect();
+        assert_eq!(right_thumb, expected, "right thumb should use cols 8–13");
+    }
+
+    // =========================================================================
+    // html_escape — SVG text safety
+    // =========================================================================
+    //
+    // Key labels are embedded in SVG <text> elements. Characters like < > &
+    // have special meaning in XML and must be escaped. The Nordic `<>` key
+    // (NonUsBackslash) is the most common offender — without escaping, it
+    // would break the SVG parser.
+
+    #[test]
+    fn html_escape_ampersand() {
+        assert_eq!(html_escape("&"), "&amp;");
+    }
+
+    #[test]
+    fn html_escape_angle_brackets() {
+        // The `<>` key label (Nordic angle brackets) must not produce
+        // bare < or > inside an SVG <text> element.
+        assert_eq!(html_escape("<>"), "&lt;&gt;");
+    }
+
+    #[test]
+    fn html_escape_leaves_normal_text_alone() {
+        // Plain ASCII labels like "Ctrl" or "Q" pass through unchanged.
+        assert_eq!(html_escape("Ctrl"), "Ctrl");
+        assert_eq!(html_escape("Q"), "Q");
+    }
+
+    #[test]
+    fn html_escape_combined() {
+        // Multiple special characters in one string.
+        assert_eq!(html_escape("A&B<C>D"), "A&amp;B&lt;C&gt;D");
+    }
+
+    // =========================================================================
+    // Half symmetry
+    // =========================================================================
+    //
+    // Each half should contribute exactly 38 keys. This ensures build_half()
+    // generates the same structure for both sides (mirrored, but same count).
+
+    #[test]
+    fn each_half_has_38_keys() {
+        let keys = build_keys();
+        let left = keys.iter().filter(|k| k.col < 7).count();
+        let right = keys.iter().filter(|k| k.col >= 7).count();
+        assert_eq!(left, 38, "left half key count");
+        assert_eq!(right, 38, "right half key count");
+    }
 }
