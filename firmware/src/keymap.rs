@@ -232,8 +232,8 @@ pub static LAYERS: [[[Keycode; COLS]; ROWS]; NUM_LAYERS] = [
     // Layer 0: QWERTY
     [
         // Row 0: number row
-        //  Left: ´`, 1, 2, 3, 4, 5, Esc       Right: +?, 6, 7, 8, 9, 0, +?
-        [ACGR, Keycode::N1, Keycode::N2, Keycode::N3, Keycode::N4, Keycode::N5, ESC,
+        //  Left: §½, 1, 2, 3, 4, 5, Esc       Right: +?, 6, 7, 8, 9, 0, +?
+        [SECT, Keycode::N1, Keycode::N2, Keycode::N3, Keycode::N4, Keycode::N5, ESC,
          PLSQ, Keycode::N6, Keycode::N7, Keycode::N8, Keycode::N9, Keycode::N0, PLSQ],
 
         // Row 1: top letter row
@@ -252,9 +252,9 @@ pub static LAYERS: [[[Keycode; COLS]; ROWS]; NUM_LAYERS] = [
          LY1, Keycode::N, Keycode::M, Keycode::Comma, Keycode::Dot, MINU, RSFT],
 
         // Row 4: thumb cluster top
-        //  Left: LY1, LAlt, LGui, §½, LGui, _unused, _unused
+        //  Left: LY1, LAlt, LGui, ´`, LGui, _unused, _unused
         //  Right: _unused, _unused, _unused, _, RAlt, _, _unused
-        [LY1, LALT, LGUI, SECT, LGUI, ___, ___,
+        [LY1, LALT, LGUI, ACGR, LGUI, ___, ___,
          ___, ___, ___, ___, RALT, ___, ___],
 
         // Row 5: thumb cluster bottom
