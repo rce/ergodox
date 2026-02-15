@@ -252,9 +252,9 @@ pub static LAYERS: [[[Keycode; COLS]; ROWS]; NUM_LAYERS] = [
          LY1, Keycode::N, Keycode::M, Keycode::Comma, Keycode::Dot, MINU, RSFT],
 
         // Row 4: thumb cluster top
-        //  Left: LY1, LAlt, LGui, §½, _unused, _unused, _unused
+        //  Left: LY1, LAlt, LGui, §½, LGui, _unused, _unused
         //  Right: _unused, _unused, _unused, _, RAlt, _, _unused
-        [LY1, LALT, LGUI, SECT, ___, ___, ___,
+        [LY1, LALT, LGUI, SECT, LGUI, ___, ___,
          ___, ___, ___, ___, RALT, ___, ___],
 
         // Row 5: thumb cluster bottom
