@@ -1,5 +1,5 @@
 [workspace]
-members = ["firmware", "ergodox-cli"]
+members = ["firmware", "ergodox-cli", "ergodox-keymap"]
 resolver = "2"
 
 [profile.release]

@@ -168,9 +168,14 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "ergodox-keymap",
  "indicatif",
  "rusb",
 ]
+
+[[package]]
+name = "ergodox-keymap"
+version = "0.1.0"
 
 [[package]]
 name = "find-msvc-tools"
@@ -183,6 +188,7 @@ name = "firmware"
 version = "0.1.0"
 dependencies = [
  "avr-device",
+ "ergodox-keymap",
 ]
 
 [[package]]

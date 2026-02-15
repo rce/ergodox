@@ -5,4 +5,5 @@ edition = "2021"
 
 [dependencies]
 avr-device = { version = "0.6", features = ["atmega32u4"] }
+ergodox-keymap = { path = "../ergodox-keymap" }
 

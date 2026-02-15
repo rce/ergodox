@@ -12,12 +12,7 @@ use avr_device::atmega32u4::Peripherals;
 
 use crate::i2c::Mcp23018;
 
-/// Number of rows in the matrix.
-pub const ROWS: usize = 6;
-/// Number of columns per half.
-pub const COLS_PER_HALF: usize = 7;
-/// Total number of columns.
-pub const COLS: usize = COLS_PER_HALF * 2;
+pub use ergodox_keymap::{COLS, COLS_PER_HALF, ROWS};
 
 /// Complete matrix state.
 pub type MatrixState = [[bool; COLS]; ROWS];
