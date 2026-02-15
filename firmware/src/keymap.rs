@@ -6,6 +6,38 @@
 
 use crate::matrix::{COLS, ROWS};
 
+/// Maps Nordic ISO key labels to their HID keycodes.
+///
+/// HID keycodes are layout-agnostic — the OS interprets them based on the
+/// active input language. These aliases let you write keymaps using the
+/// labels printed on a Nordic keyboard instead of the US-centric HID names.
+pub mod layout {
+    pub mod nordic {
+        use super::super::Keycode;
+
+        /// `+` (unshifted) / `?` (shifted) — key right of 0
+        pub const PLUS_QUESTION: Keycode = Keycode::Minus;
+        /// `´` (unshifted) / `` ` `` (shifted) — key right of +
+        pub const ACUTE_GRAVE: Keycode = Keycode::Equal;
+        /// `å`
+        pub const A_RING: Keycode = Keycode::LBracket;
+        /// `¨` (unshifted) / `^` (shifted)
+        pub const DIAERESIS_CARET: Keycode = Keycode::RBracket;
+        /// `'` (unshifted) / `*` (shifted)
+        pub const APOSTROPHE_STAR: Keycode = Keycode::Backslash;
+        /// `ö`
+        pub const O_DIAERESIS: Keycode = Keycode::Semicolon;
+        /// `ä`
+        pub const A_DIAERESIS: Keycode = Keycode::Quote;
+        /// `§` (unshifted) / `½` (shifted) — top-left key
+        pub const SECTION_HALF: Keycode = Keycode::Grave;
+        /// `<` (unshifted) / `>` (shifted) — ISO key left of Z
+        pub const ANGLE_BRACKETS: Keycode = Keycode::NonUsBackslash;
+        /// `-` (unshifted) / `_` (shifted) — key right of `.`
+        pub const MINUS_UNDERSCORE: Keycode = Keycode::Slash;
+    }
+}
+
 /// USB HID keycodes.
 /// See USB HID Usage Tables, Section 10 (Keyboard/Keypad Page 0x07).
 #[derive(Copy, Clone, PartialEq, Eq)]
@@ -173,8 +205,22 @@ const LALT: Keycode = Keycode::LAlt;
 const LGUI: Keycode = Keycode::LGui;
 const RSFT: Keycode = Keycode::RShift;
 const RALT: Keycode = Keycode::RAlt;
-const NUBS: Keycode = Keycode::NonUsBackslash;
+const PGUP: Keycode = Keycode::PageUp;
+const PGDN: Keycode = Keycode::PageDown;
 const LY1: Keycode = Keycode::Layer1;
+
+// Nordic layout shorthand aliases
+use layout::nordic as Nordic;
+const PLSQ: Keycode = Nordic::PLUS_QUESTION;
+const ACGR: Keycode = Nordic::ACUTE_GRAVE;
+const ARING: Keycode = Nordic::A_RING;
+const DIAC: Keycode = Nordic::DIAERESIS_CARET;
+const APST: Keycode = Nordic::APOSTROPHE_STAR;
+const ODIA: Keycode = Nordic::O_DIAERESIS;
+const ADIA: Keycode = Nordic::A_DIAERESIS;
+const SECT: Keycode = Nordic::SECTION_HALF;
+const ANGB: Keycode = Nordic::ANGLE_BRACKETS;
+const MINU: Keycode = Nordic::MINUS_UNDERSCORE;
 
 /// Keymap layers.
 /// Layout follows the ErgoDox physical matrix:
@@ -186,29 +232,29 @@ pub static LAYERS: [[[Keycode; COLS]; ROWS]; NUM_LAYERS] = [
     // Layer 0: QWERTY
     [
         // Row 0: number row
-        //  Left: =, 1, 2, 3, 4, 5, Esc       Right: -, 6, 7, 8, 9, 0, _unused
-        [Keycode::Equal, Keycode::N1, Keycode::N2, Keycode::N3, Keycode::N4, Keycode::N5, ESC,
-         Keycode::Minus, Keycode::N6, Keycode::N7, Keycode::N8, Keycode::N9, Keycode::N0, ___],
+        //  Left: ´`, 1, 2, 3, 4, 5, Esc       Right: +?, 6, 7, 8, 9, 0, +?
+        [ACGR, Keycode::N1, Keycode::N2, Keycode::N3, Keycode::N4, Keycode::N5, ESC,
+         PLSQ, Keycode::N6, Keycode::N7, Keycode::N8, Keycode::N9, Keycode::N0, PLSQ],
 
         // Row 1: top letter row
-        //  Left: Tab, Q, W, E, R, T, [         Right: ], Y, U, I, O, P, \
-        [TAB, Keycode::Q, Keycode::W, Keycode::E, Keycode::R, Keycode::T, Keycode::LBracket,
-         Keycode::RBracket, Keycode::Y, Keycode::U, Keycode::I, Keycode::O, Keycode::P, Keycode::Backslash],
+        //  Left: Tab, Q, W, E, R, T, PgUp      Right: ¨^, Y, U, I, O, P, '*
+        [TAB, Keycode::Q, Keycode::W, Keycode::E, Keycode::R, Keycode::T, PGUP,
+         DIAC, Keycode::Y, Keycode::U, Keycode::I, Keycode::O, Keycode::P, APST],
 
         // Row 2: home row
-        //  Left: LCtrl, A, S, D, F, G, _unused  Right: _unused, H, J, K, L, ;, '
-        [LCTL, Keycode::A, Keycode::S, Keycode::D, Keycode::F, Keycode::G, ___,
-         ___, Keycode::H, Keycode::J, Keycode::K, Keycode::L, Keycode::Semicolon, Keycode::Quote],
+        //  Left: LCtrl, A, S, D, F, G, LY1     Right: _unused, H, J, K, L, ö, ä
+        [LCTL, Keycode::A, Keycode::S, Keycode::D, Keycode::F, Keycode::G, LY1,
+         ___, Keycode::H, Keycode::J, Keycode::K, Keycode::L, ODIA, ADIA],
 
         // Row 3: bottom row
-        //  Left: <>, Z, X, C, V, B, LY1    Right: LY1, N, M, ,, ., /, RShift
-        [NUBS, Keycode::Z, Keycode::X, Keycode::C, Keycode::V, Keycode::B, LY1,
-         LY1, Keycode::N, Keycode::M, Keycode::Comma, Keycode::Dot, Keycode::Slash, RSFT],
+        //  Left: <>, Z, X, C, V, B, PgDn   Right: LY1, N, M, ,, ., -_, RShift
+        [ANGB, Keycode::Z, Keycode::X, Keycode::C, Keycode::V, Keycode::B, PGDN,
+         LY1, Keycode::N, Keycode::M, Keycode::Comma, Keycode::Dot, MINU, RSFT],
 
         // Row 4: thumb cluster top
-        //  Left: `, LAlt, LGui, _, _unused, _unused, _unused
+        //  Left: LY1, LAlt, LGui, §½, _unused, _unused, _unused
         //  Right: _unused, _unused, _unused, _, RAlt, _, _unused
-        [Keycode::Grave, LALT, LGUI, ___, ___, ___, ___,
+        [LY1, LALT, LGUI, SECT, ___, ___, ___,
          ___, ___, ___, ___, RALT, ___, ___],
 
         // Row 5: thumb cluster bottom
