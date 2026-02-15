@@ -8,3 +8,4 @@ clap = { version = "4", features = ["derive"] }
 rusb = "0.9"
 indicatif = "0.17"
 anyhow = "1"
+ergodox-keymap = { path = "../ergodox-keymap" }

@@ -3,7 +3,7 @@
 IMAGE := ergodox-firmware
 DOCKER_RUN := docker run --rm -v $(CURDIR):/build $(IMAGE)
 
-.PHONY: docker build-firmware build-cli build hex flash detect test clean
+.PHONY: docker build-firmware build-cli build hex flash detect layout test clean
 
 # Build the Docker image
 docker:
@@ -31,6 +31,11 @@ flash: hex build-cli
 # Check if Teensy is in bootloader mode
 detect:
 	cargo run --release -p ergodox-cli -- detect
+
+# Generate HTML layout visualization
+layout: build-cli
+	cargo run --release -p ergodox-cli -- layout > layout.html
+	@echo "Generated layout.html"
 
 # Run CLI tests
 test:

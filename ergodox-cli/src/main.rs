@@ -1,5 +1,6 @@
 mod halfkay;
 mod hex;
+mod layout;
 
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
@@ -22,6 +23,8 @@ enum Command {
     },
     /// Detect if a Teensy is connected in bootloader mode
     Detect,
+    /// Generate an HTML layout visualization of the keymap
+    Layout,
 }
 
 fn main() -> Result<()> {
@@ -76,6 +79,9 @@ fn main() -> Result<()> {
                 println!("Teensy bootloader not detected.");
                 println!("Press the reset button on the Teensy to enter bootloader mode.");
             }
+        }
+        Command::Layout => {
+            print!("{}", layout::generate_html());
         }
     }
 
