@@ -247,9 +247,9 @@ pub static LAYERS: [[[Keycode; COLS]; ROWS]; NUM_LAYERS] = [
          ___, Keycode::H, Keycode::J, Keycode::K, Keycode::L, ODIA, ADIA],
 
         // Row 3: bottom row
-        //  Left: <>, Z, X, C, V, B, PgDn   Right: LY1, N, M, ,, ., -_, RShift
+        //  Left: <>, Z, X, C, V, B, PgDn   Right: LY1, N, M, ,, ., -_, '*
         [ANGB, Keycode::Z, Keycode::X, Keycode::C, Keycode::V, Keycode::B, PGDN,
-         LY1, Keycode::N, Keycode::M, Keycode::Comma, Keycode::Dot, MINU, RSFT],
+         LY1, Keycode::N, Keycode::M, Keycode::Comma, Keycode::Dot, MINU, APST],
 
         // Row 4: thumb cluster top
         //  Left: LY1, LAlt, LGui, ´`, LGui, _unused, _unused
