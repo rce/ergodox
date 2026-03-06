@@ -344,7 +344,7 @@ pub static LAYERS: [[[Keycode; COLS]; ROWS]; NUM_LAYERS] = [
             Keycode::N4,
             Keycode::N5,
             ___,
-            PLSQ,
+            ___,
             Keycode::N6,
             Keycode::N7,
             Keycode::N8,
@@ -362,13 +362,13 @@ pub static LAYERS: [[[Keycode; COLS]; ROWS]; NUM_LAYERS] = [
             Keycode::R,
             Keycode::T,
             PGUP,
-            DIAC,
+            ___,
             Keycode::Y,
             Keycode::U,
             Keycode::I,
             Keycode::O,
             Keycode::P,
-            APST,
+            ___,
         ],
         // Row 2: home row
         //  Left: LCtrl, A, S, D, F, G, LY1     Right: _unused, H, J, K, L, ö, ä
@@ -379,8 +379,8 @@ pub static LAYERS: [[[Keycode; COLS]; ROWS]; NUM_LAYERS] = [
             Keycode::D,
             Keycode::F,
             Keycode::G,
-            LY1,
-            ___,
+            LY1, // ???
+            ___, // ???
             Keycode::H,
             Keycode::J,
             Keycode::K,
@@ -407,42 +407,42 @@ pub static LAYERS: [[[Keycode; COLS]; ROWS]; NUM_LAYERS] = [
             APST,
         ],
         // Row 4: thumb cluster top
-        //  Left: LY1, LAlt, LGui, ´`, LGui, _unused, _unused
+        //  Left: LY1, LAlt, LGui, LAlt, LGui, _unused, _unused
         //  Right: _unused, _unused, Left, Down, Up, Right, LY1
         [
             LY1,
+            ___,
+            ___,
             LALT,
-            LGUI,
-            ACGR,
-            LGUI,
-            ___,
-            ___,
-            ___,
-            ___,
+            LGUI, // Cmd/Win
+            ___, // ??
+            ___, // ??
+            ___, // ??
+            ___, // ??
             Keycode::Left,
             Keycode::Down,
             Keycode::Up,
             Keycode::Right,
-            LY1,
+            ___,
         ],
         // Row 5: thumb cluster bottom
         //  Left: Esc, _unused, Space, Enter, Home, End, _unused
         //  Right: _unused, _unused, _unused, RShift, Bksp, _unused, _unused
         [
-            ESC,
-            ___,
-            ENT,
-            SPC,
-            Keycode::Home,
-            Keycode::End,
-            ___,
-            ___,
-            DEL,
-            ___,
-            RSFT,
-            BSP,
-            ___,
-            ___,
+            Keycode::A,
+            ESC, // Esc
+            ENT, // Enter
+            SPC, // Space
+            ___, // Endin alla
+            Keycode::Home, // Home
+            Keycode::End, // End
+            ___, // oikeen puolen 'home'
+            DEL, // oikeen puolen 'end'
+            ___, // ylempi pieni
+            RSFT, // Shift
+            BSP, // Backspace
+            ___, // alempi pieni
+            Keycode::F,
         ],
     ],
     // Layer 1: Function/Symbol
